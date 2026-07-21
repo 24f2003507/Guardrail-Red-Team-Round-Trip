@@ -89,19 +89,18 @@ class Request(BaseModel):
 # -------------------------------------------------
 # Path guard
 # -------------------------------------------------
-
 def normalize_path(user_path: str):
 
-    # grader may send absolute sandbox paths
-    if user_path.startswith(
-        "/srv/agent-redteam/sandbox-b51b7ea541"
-    ):
+    sandbox_prefix = "/srv/agent-redteam/sandbox-b51b7ea541"
 
-        user_path = user_path.replace(
-            "/srv/agent-redteam/sandbox-b51b7ea541",
-            "",
-            1
-        )
+    # Convert grader absolute path to relative path
+    if user_path.startswith(sandbox_prefix):
+
+        user_path = user_path[len(sandbox_prefix):]
+
+
+    # Remove only the leading slash
+    user_path = user_path.lstrip("/")
 
 
     target = (
@@ -110,9 +109,7 @@ def normalize_path(user_path: str):
 
 
     try:
-        target.relative_to(
-            REAL_SANDBOX
-        )
+        target.relative_to(REAL_SANDBOX)
 
     except ValueError:
         raise Exception(
@@ -123,15 +120,16 @@ def normalize_path(user_path: str):
     return target
 
 
-
 def read_file(path):
 
     target = normalize_path(path)
+
 
     if not target.exists():
         raise Exception(
             "File not found"
         )
+
 
     return target.read_text(
         encoding="utf-8"
