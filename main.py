@@ -267,7 +267,7 @@ def fetch_url(url):
 # Endpoint
 # -------------------------------------------------
 
-@app.post("/")
+@app.post("/check")
 def guardrail(req: Request):
 
     try:
